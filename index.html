@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bukit Marak Wedding - Booking Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles */
+        .status-booked {
+            background-color: #fecaca;
+            border-color: #f87171;
+        }
+        .status-available {
+            background-color: #d1fae5;
+            border-color: #34d399;
+        }
+        .status-tentative {
+            background-color: #fef3c7;
+            border-color: #fbbf24;
+        }
+        .calendar-day {
+            transition: all 0.2s ease;
+        }
+        .calendar-day:hover {
+            transform: scale(1.05);
+        }
+        @media (max-width: 640px) {
+            .calendar-weekdays {
+                display: none;
+            }
+            .calendar-day-number {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div class="flex items-center gap-4">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/cd2c04bc-946c-4b18-a9d1-c30826f0f8bf.png" alt="Bukit Marak Wedding logo featuring elegant floral design with gold accents and the hall's name in beautiful calligraphy" class="w-16 h-16 rounded-full border-2 border-amber-200 object-cover">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Bukit Marak Wedding</h1>
+                    <p class="text-gray-600">Booking Management System</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="bg-white p-2 rounded-lg shadow border flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-green-200 border border-green-400"></div>
+                    <span class="text-sm">Available</span>
+                </div>
+                <div class="bg-white p-2 rounded-lg shadow border flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-red-200 border border-red-400"></div>
+                    <span class="text-sm">Booked</span>
+                </div>
+                <div class="bg-white p-2 rounded-lg shadow border flex items-center gap-2">
+                    <div class="w-4 h-4 rounded-full bg-yellow-200 border border-yellow-400"></div>
+                    <span class="text-sm">Tentative</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Navigation -->
+        <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <button id="prev-month" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-chevron-left text-gray-700"></i>
+                </button>
+                <h2 id="current-month" class="text-xl font-semibold text-gray-800 text-center">January 2023</h2>
+                <button id="next-month" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-chevron-right text-gray-700"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 mb-2 calendar-weekdays">
+                <div class="text-center font-medium text-sm text-gray-500 py-1">Sun</div>
+                <div class="text-center font-medium text-sm text-gray-500 py-1">Mon</div>
+                <div class="text-center font-medium text-sm text-gray-500 py-1">Tue</div>
+                <div class="text-center font-medium text-sm text-gray-500 py-1">Wed</div>
+                <div class="text-center font-medium text-sm text-gray-500 py-1">Thu</div>
+                <div class="text-center font-medium text-sm text-gray-500 py-1">Fri</div>
+                <div class="text-center font-medium text-sm text-gray-500 py-1">Sat</div>
+            </div>
+            <div id="calendar" class="grid grid-cols-7 gap-1">
+                <!-- Calendar days will be generated here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-6" id="booking-form-container" style="display: none;">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Booking Details</h3>
+            <form id="booking-form" class="space-y-4">
+                <input type="hidden" id="booking-date">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                        <input type="text" id="customer-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="customer-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                        <input type="tel" id="customer-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="event-type" class="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+                        <select id="event-type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="Wedding">Wedding</option>
+                            <option value="Engagement">Engagement</option>
+                            <option value="Birthday">Birthday</option>
+                            <option value="Corporate">Corporate Event</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="booking-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select id="booking-status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="Booked">Booked</option>
+                            <option value="Tentative">Tentative</option>
+                            <option value="Available">Available</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Special Requests/Notes</label>
+                    <textarea id="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="cancel-booking" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 border border-transparent rounded-md text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        Save Booking
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bookings List -->
+        <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Bookings Management</h3>
+                <div class="flex space-x-2">
+                    <button id="export-excel" class="p-2 text-green-600 hover:text-green-700 transition" title="Export to Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </button>
+                    <button id="refresh-bookings" class="p-2 text-amber-600 hover:text-amber-700 transition" title="Refresh">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button id="show-all-bookings" class="p-2 text-blue-600 hover:text-blue-700 transition" title="Show All Bookings">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="bookings-list" class="space-y-2">
+                <!-- Bookings will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+            <h3 id="modal-title" class="text-lg font-semibold text-gray-800 mb-2">Confirmation</h3>
+            <p id="modal-message" class="text-gray-700 mb-4">Are you sure you want to perform this action?</p>
+            <div class="flex justify-end space-x-3">
+                <button id="modal-cancel" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button id="modal-confirm" class="px-4 py-2 border border-transparent rounded-md text-white bg-amber-600 hover:bg-amber-700">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Calendar and Booking Management Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const calendarEl = document.getElementById('calendar');
+            const currentMonthEl = document.getElementById('current-month');
+            const prevMonthBtn = document.getElementById('prev-month');
+            const nextMonthBtn = document.getElementById('next-month');
+            const bookingFormContainer = document.getElementById('booking-form-container');
+            const bookingForm = document.getElementById('booking-form');
+            const bookingDateInput = document.getElementById('booking-date');
+            const bookingsList = document.getElementById('bookings-list');
+            const refreshBookingsBtn = document.getElementById('refresh-bookings');
+            const cancelBookingBtn = document.getElementById('cancel-booking');
+            const modal = document.getElementById('confirmation-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalCancel = document.getElementById('modal-cancel');
+            const modalConfirm = document.getElementById('modal-confirm');
+
+            // Current date and calendar state
+            let currentDate = new Date();
+            let selectedDate = null;
+            let selectedBookingId = null;
+
+            // Export to Excel function
+            function exportToExcel() {
+                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                if (bookings.length === 0) {
+                    alert('No bookings to export');
+                    return;
+                }
+                
+                let csv = 'Date,Customer Name,Phone,Event Type,Status,Notes\n';
+                bookings.forEach(booking => {
+                    csv += `"${formatDisplayDate(booking.date)}","${booking.customerName}","${booking.customerPhone}","${booking.eventType}","${booking.status}","${booking.notes || ''}"\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `BukitMarak_bookings_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            // Format date for display
+            function formatDisplayDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    weekday: 'short'
+                });
+            }
+            
+            // Show all bookings (past and future)
+            function showAllBookings() {
+                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                
+                if (bookings.length === 0) {
+                    bookingsList.innerHTML = '<p class="text-gray-500 text-center py-4">No bookings found</p>';
+                    return;
+                }
+                
+                bookingsList.innerHTML = `
+                    <div class="mb-4 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${bookings.map(booking => `
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap">${formatDisplayDate(booking.date)}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">${booking.customerName}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">${booking.customerPhone}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">${booking.eventType}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs rounded-full ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                            ${booking.status}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button class="edit-booking text-amber-600 hover:text-amber-900 mr-3" data-id="${booking.id}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="delete-booking text-red-600 hover:text-red-900" data-id="${booking.id}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            // Initialize the calendar
+            function initCalendar() {
+                renderCalendar();
+                loadBookings();
+                
+                // Load existing bookings from localStorage
+                if (!localStorage.getItem('bukitMarakBookings')) {
+                    localStorage.setItem('bukitMarakBookings', JSON.stringify([]));
+                }
+            }
+
+            // Render the calendar for the current month
+            function renderCalendar() {
+                // Clear the calendar
+                calendarEl.innerHTML = '';
+                
+                // Set the current month title
+                currentMonthEl.textContent = new Intl.DateTimeFormat('en-US', { 
+                    month: 'long', 
+                    year: 'numeric' 
+                }).format(currentDate);
+                
+                // Get the first day of the month and the number of days
+                const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDay = firstDay.getDay();
+                
+                // Add empty cells for days of previous month
+                for (let i = 0; i < startingDay; i++) {
+                    const dayElement = document.createElement('div');
+                    dayElement.classList.add('h-24', 'p-1');
+                    calendarEl.appendChild(dayElement);
+                }
+                
+                // Add cells for each day of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                    const dateString = formatDate(date);
+                    
+                    const bookings = getBookingsForDate(dateString);
+                    const bookingStatus = bookings.length > 0 ? bookings[0].status : 'Available';
+                    
+                    const dayElement = document.createElement('div');
+                    dayElement.classList.add('calendar-day', 'h-24', 'p-1', 'border', 'rounded-lg', 'cursor-pointer', `status-${bookingStatus.toLowerCase()}`);
+                    dayElement.dataset.date = dateString;
+                    
+                    dayElement.innerHTML = `
+                        <div class="calendar-day-number text-right text-sm font-medium mb-1">${day}</div>
+                        ${bookings.map(booking => `
+                            <div class="text-xs p-1 mb-1 truncate rounded ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                ${booking.eventType} - ${booking.customerName}
+                            </div>
+                        `).join('')}
+                    `;
+                    
+                    dayElement.addEventListener('click', () => openBookingForm(day));
+                    dayElement.draggable = true;
+                    dayElement.addEventListener('dragstart', (e) => {
+                        if (selectedBookingId) {
+                            e.dataTransfer.setData('text/plain', selectedBookingId);
+                        }
+                    });
+                    dayElement.addEventListener('dragover', (e) => e.preventDefault());
+                    dayElement.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        const bookingId = e.dataTransfer.getData('text/plain');
+                        if (bookingId) {
+                            moveBookingToDate(bookingId, dateString);
+                        }
+                    });
+                    calendarEl.appendChild(dayElement);
+                }
+            }
+
+            // Format date as YYYY-MM-DD
+            function formatDate(date) {
+                const d = new Date(date);
+                let month = '' + (d.getMonth() + 1);
+                let day = '' + d.getDate();
+                const year = d.getFullYear();
+                
+                if (month.length < 2) month = '0' + month;
+                if (day.length < 2) day = '0' + day;
+                
+                return [year, month, day].join('-');
+            }
+
+            // Get bookings for a specific date
+            function getBookingsForDate(date) {
+                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                return bookings.filter(booking => booking.date === date);
+            }
+
+            // Open booking form
+            function openBookingForm(day) {
+                selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                const dateString = formatDate(selectedDate);
+                bookingDateInput.value = dateString;
+                
+                const bookings = getBookingsForDate(dateString);
+                
+                if (bookings.length > 0) {
+                    const booking = bookings[0];
+                    selectedBookingId = booking.id;
+                    document.getElementById('customer-name').value = booking.customerName;
+                    document.getElementById('customer-phone').value = booking.customerPhone;
+                    document.getElementById('event-type').value = booking.eventType;
+                    document.getElementById('booking-status').value = booking.status;
+                    document.getElementById('notes').value = booking.notes || '';
+                } else {
+                    selectedBookingId = null;
+                    document.getElementById('customer-name').value = '';
+                    document.getElementById('customer-phone').value = '';
+                    document.getElementById('event-type').value = 'Wedding';
+                    document.getElementById('booking-status').value = 'Booked';
+                    document.getElementById('notes').value = '';
+                }
+                
+                bookingFormContainer.style.display = 'block';
+                window.scrollTo({
+                    top: bookingFormContainer.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            }
+
+            // Load and display all bookings
+            function loadBookings() {
+                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                const now = new Date();
+                const todayString = formatDate(now);
+                
+                // Filter upcoming bookings (from today onwards) and sort by date
+                const upcoming = bookings
+                    .filter(booking => booking.date >= todayString)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                bookingsList.innerHTML = '';
+                
+                if (upcoming.length === 0) {
+                    bookingsList.innerHTML = '<p class="text-gray-500 text-center py-4">No upcoming bookings found</p>';
+                    return;
+                }
+                
+                upcoming.forEach(booking => {
+                    const bookingDate = new Date(booking.date);
+                    const bookingItem = document.createElement('div');
+                    bookingItem.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'border');
+                    bookingItem.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-medium text-gray-800">${booking.customerName}</h4>
+                                <div class="text-sm text-gray-600">${bookingDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                                <div class="mt-1">
+                                    <span class="inline-block px-2 py-1 text-xs rounded-full ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                        ${booking.status}
+                                    </span>
+                                    <span class="ml-2 text-sm text-gray-600">${booking.eventType}</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="edit-booking p-2 text-amber-600 hover:text-amber-700" data-id="${booking.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="delete-booking p-2 text-red-600 hover:text-red-700" data-id="${booking.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        ${booking.notes ? `<div class="mt-2 text-sm text-gray-700"><strong>Notes:</strong> ${booking.notes}</div>` : ''}
+                        <div class="mt-2 text-sm text-gray-500 flex items-center">
+                            <i class="fas fa-phone-alt mr-1"></i> ${booking.customerPhone}
+                        </div>
+                    `;
+                    bookingsList.appendChild(bookingItem);
+                });
+                
+                // Add event listeners to edit and delete buttons
+                document.querySelectorAll('.edit-booking').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const bookingId = this.dataset.id;
+                        editBooking(bookingId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-booking').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const bookingId = this.dataset.id;
+                        const booking = bookings.find(b => b.id === bookingId);
+                        showConfirmationModal(
+                            'Delete Booking',
+                            `Are you sure you want to delete the booking for ${booking.customerName} on ${new Date(booking.date).toLocaleDateString('en-US')}?`,
+                            () => deleteBooking(bookingId)
+                        );
+                    });
+                });
+            }
+
+            // Edit a booking
+            function editBooking(bookingId) {
+                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                const booking = bookings.find(b => b.id === bookingId);
+                
+                if (booking) {
+                    const dateParts = booking.date.split('-');
+                    selectedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                    
+                    // Set the calendar to the booking's month
+                    currentDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+                    renderCalendar();
+                    
+                    // Open the form with booking details
+                    document.getElementById('booking-date').value = booking.date;
+                    document.getElementById('customer-name').value = booking.customerName;
+                    document.getElementById('customer-phone').value = booking.customerPhone;
+                    document.getElementById('event-type').value = booking.eventType;
+                    document.getElementById('booking-status').value = booking.status;
+                    document.getElementById('notes').value = booking.notes || '';
+                    selectedBookingId = bookingId;
+                    
+                    bookingFormContainer.style.display = 'block';
+                    window.scrollTo({
+                        top: bookingFormContainer.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            // Delete a booking
+            function moveBookingToDate(bookingId, newDate) {
+                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                const updatedBookings = bookings.map(booking => {
+                    if (booking.id === bookingId) {
+                        return {...booking, date: newDate};
+                    }
+                    return booking;
+                });
+                localStorage.setItem('bukitMarakBookings', JSON.stringify(updatedBookings));
+                renderCalendar();
+                loadBookings();
+            }
+
+            function deleteBooking(bookingId) {
+                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                const updatedBookings = bookings.filter(booking => booking.id !== bookingId);
+                localStorage.setItem('bukitMarakBookings', JSON.stringify(updatedBookings));
+                renderCalendar();
+                loadBookings();
+                hideConfirmationModal();
+            }
+
+            // Show confirmation modal
+            function showConfirmationModal(title, message, confirmCallback) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modal.style.display = 'flex';
+                
+                modalConfirm.onclick = function() {
+                    confirmCallback();
+                };
+            }
+
+            // Hide confirmation modal
+            function hideConfirmationModal() {
+                modal.style.display = 'none';
+            }
+
+            // Show date picker modal
+            function showDatePicker() {
+                modalTitle.textContent = 'Select New Date';
+                modalMessage.innerHTML = `
+                    <div class="mt-4">
+                        <label for="new-date" class="block text-sm font-medium text-gray-700">New Booking Date</label>
+                        <input type="date" id="new-date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                    </div>
+                `;
+                modal.style.display = 'flex';
+                
+                // Set min date to today
+                const today = new Date();
+                document.getElementById('new-date').min = today.toISOString().split('T')[0];
+                
+                modalConfirm.onclick = function() {
+                    const newDate = document.getElementById('new-date').value;
+                    if (newDate) {
+                        bookingDateInput.value = newDate;
+                        hideConfirmationModal();
+                    }
+                };
+            }
+
+            // Event Listeners
+            prevMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            nextMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+            bookingForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // If changing date, don't submit the form
+                if (e.submitter && e.submitter.id === 'change-date') {
+                    showDatePicker();
+                    return;
+                }
+                
+                const customerName = document.getElementById('customer-name').value.trim();
+                const customerPhone = document.getElementById('customer-phone').value.trim();
+                const eventType = document.getElementById('event-type').value;
+                const status = document.getElementById('booking-status').value;
+                const notes = document.getElementById('notes').value.trim();
+                const date = bookingDateInput.value;
+                
+                if (!customerName) {
+                    alert('Please enter customer name');
+                    return;
+                }
+                
+                if (!customerPhone) {
+                    alert('Please enter customer phone number');
+                    return;
+                }
+                
+                let bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                
+                if (selectedBookingId) {
+                    // Update existing booking
+                    bookings = bookings.map(booking => {
+                        if (booking.id === selectedBookingId) {
+                            return {
+                                ...booking,
+                                customerName,
+                                customerPhone,
+                                eventType,
+                                status,
+                                notes,
+                                date
+                            };
+                        }
+                        return booking;
+                    });
+                } else {
+                    // Create new booking
+                    const newBooking = {
+                        id: Date.now().toString(),
+                        customerName,
+                        customerPhone,
+                        eventType,
+                        status,
+                        notes,
+                        date
+                    };
+                    
+                    // Only add if the date is available (unless status is Available)
+                    const existingBooking = bookings.find(b => b.date === date && b.status !== 'Available');
+                    if (existingBooking && status !== 'Available') {
+                        alert(`This date is already booked by ${existingBooking.customerName}. Please check availability.`);
+                        return;
+                    }
+                    
+                    bookings.push(newBooking);
+                }
+                
+                localStorage.setItem('bukitMarakBookings', JSON.stringify(bookings));
+                renderCalendar();
+                loadBookings();
+                bookingFormContainer.style.display = 'none';
+                selectedBookingId = null;
+            });
+
+            cancelBookingBtn.addEventListener('click', function() {
+                bookingFormContainer.style.display = 'none';
+                selectedBookingId = null;
+            });
+
+            refreshBookingsBtn.addEventListener('click', loadBookings);
+
+            modalCancel.addEventListener('click', hideConfirmationModal);
+
+            // Initialize the app
+            initCalendar();
+            
+            // Add event listeners for new buttons
+            document.getElementById('export-excel').addEventListener('click', exportToExcel);
+            document.getElementById('show-all-bookings').addEventListener('click', showAllBookings);
+        });
+    </script>
+</body>
+</html>
+
