@@ -675,6 +675,29 @@
             document.getElementById('show-all-bookings').addEventListener('click', showAllBookings);
         });
     </script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+        // Optionally import analytics if needed:
+        // import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js';
+
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyAZXz25VayaadUfahJhAq6HvSnn3lJkVP8",
+            authDomain: "bukitmarak-f545b.firebaseapp.com",
+            projectId: "bukitmarak-f545b",
+            storageBucket: "bukitmarak-f545b.firebasestorage.app",
+            messagingSenderId: "356655852099",
+            appId: "1:356655852099:web:2def78a8865d2fd75c42f6",
+            measurementId: "G-TF0NTSDXRH"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        // Optionally initialize analytics:
+        // const analytics = getAnalytics(app);
+    </script>
 </body>
 </html>
 
