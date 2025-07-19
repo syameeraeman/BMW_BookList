@@ -69,7 +69,7 @@
                 <button id="prev-month" class="p-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="fas fa-chevron-left text-gray-700"></i>
                 </button>
-                <h2 id="current-month" class="text-xl font-semibold text-gray-800 text-center">January 2023</h2>
+                <h2 id="current-month" class="text-xl font-semibold text-gray-800 text-center">Loading...</h2>
                 <button id="next-month" class="p-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="fas fa-chevron-right text-gray-700"></i>
                 </button>
@@ -84,7 +84,10 @@
                 <div class="text-center font-medium text-sm text-gray-500 py-1">Sat</div>
             </div>
             <div id="calendar" class="grid grid-cols-7 gap-1">
-                <!-- Calendar days will be generated here by JavaScript -->
+                <div class="col-span-7 text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                    <p class="mt-2 text-gray-600">Loading calendar...</p>
+                </div>
             </div>
         </div>
 
@@ -296,6 +299,12 @@
             // Firebase Database Functions
             async function getAllBookings() {
                 try {
+                    if (!window.firebaseDB) {
+                        // Fallback to localStorage if Firebase is not available
+                        const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                        return bookings;
+                    }
+                    
                     const { collection, getDocs, query, orderBy } = window.firebaseDB;
                     const bookingsRef = collection(window.firebaseDB.db, 'bookings');
                     const q = query(bookingsRef, orderBy('date'));
@@ -307,12 +316,26 @@
                     return bookings;
                 } catch (error) {
                     console.error('Error getting bookings:', error);
-                    return [];
+                    // Fallback to localStorage
+                    const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                    return bookings;
                 }
             }
 
             async function addBooking(bookingData) {
                 try {
+                    if (!window.firebaseDB) {
+                        // Fallback to localStorage
+                        const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                        const newBooking = {
+                            id: Date.now().toString(),
+                            ...bookingData
+                        };
+                        bookings.push(newBooking);
+                        localStorage.setItem('bukitMarakBookings', JSON.stringify(bookings));
+                        return newBooking.id;
+                    }
+                    
                     const { collection, addDoc } = window.firebaseDB;
                     const bookingsRef = collection(window.firebaseDB.db, 'bookings');
                     const docRef = await addDoc(bookingsRef, bookingData);
@@ -325,6 +348,19 @@
 
             async function updateBooking(bookingId, bookingData) {
                 try {
+                    if (!window.firebaseDB) {
+                        // Fallback to localStorage
+                        const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                        const updatedBookings = bookings.map(booking => {
+                            if (booking.id === bookingId) {
+                                return { ...booking, ...bookingData };
+                            }
+                            return booking;
+                        });
+                        localStorage.setItem('bukitMarakBookings', JSON.stringify(updatedBookings));
+                        return;
+                    }
+                    
                     const { doc, updateDoc } = window.firebaseDB;
                     const bookingRef = doc(window.firebaseDB.db, 'bookings', bookingId);
                     await updateDoc(bookingRef, bookingData);
@@ -336,6 +372,14 @@
 
             async function deleteBookingFromDB(bookingId) {
                 try {
+                    if (!window.firebaseDB) {
+                        // Fallback to localStorage
+                        const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
+                        const updatedBookings = bookings.filter(booking => booking.id !== bookingId);
+                        localStorage.setItem('bukitMarakBookings', JSON.stringify(updatedBookings));
+                        return;
+                    }
+                    
                     const { doc, deleteDoc } = window.firebaseDB;
                     const bookingRef = doc(window.firebaseDB.db, 'bookings', bookingId);
                     await deleteDoc(bookingRef);
@@ -347,11 +391,28 @@
 
             // Initialize the calendar
             async function initCalendar() {
-                renderCalendar();
+                // Wait for Firebase to be available
+                let attempts = 0;
+                while (!window.firebaseDB && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (!window.firebaseDB) {
+                    console.warn('Firebase not available, using localStorage fallback');
+                    // Initialize localStorage if not already done
+                    if (!localStorage.getItem('bukitMarakBookings')) {
+                        localStorage.setItem('bukitMarakBookings', JSON.stringify([]));
+                    }
+                }
+                
+                await renderCalendar();
                 await loadBookings();
                 
-                // Set up real-time listener for bookings
-                setupRealtimeListener();
+                // Set up real-time listener for bookings only if Firebase is available
+                if (window.firebaseDB) {
+                    setupRealtimeListener();
+                }
             }
 
             // Set up real-time listener for bookings
@@ -366,6 +427,9 @@
                         snapshot.forEach((doc) => {
                             bookings.push({ id: doc.id, ...doc.data() });
                         });
+                        
+                        // Clear cache to force fresh data
+                        window.cachedBookings = null;
                         
                         // Update calendar and bookings list
                         renderCalendar().catch(error => {
@@ -384,65 +448,94 @@
 
             // Render the calendar for the current month
             async function renderCalendar() {
-                // Clear the calendar
-                calendarEl.innerHTML = '';
-                
-                // Set the current month title
-                currentMonthEl.textContent = new Intl.DateTimeFormat('en-US', { 
-                    month: 'long', 
-                    year: 'numeric' 
-                }).format(currentDate);
-                
-                // Get the first day of the month and the number of days
-                const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-                const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-                const daysInMonth = lastDay.getDate();
-                const startingDay = firstDay.getDay();
-                
-                // Add empty cells for days of previous month
-                for (let i = 0; i < startingDay; i++) {
-                    const dayElement = document.createElement('div');
-                    dayElement.classList.add('h-24', 'p-1');
-                    calendarEl.appendChild(dayElement);
-                }
-                
-                // Add cells for each day of the month
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-                    const dateString = formatDate(date);
+                try {
+                    // Clear the calendar
+                    calendarEl.innerHTML = '';
                     
-                    const bookings = await getBookingsForDate(dateString);
-                    const bookingStatus = bookings.length > 0 ? bookings[0].status : 'Available';
+                    // Set the current month title
+                    currentMonthEl.textContent = new Intl.DateTimeFormat('en-US', { 
+                        month: 'long', 
+                        year: 'numeric' 
+                    }).format(currentDate);
                     
-                    const dayElement = document.createElement('div');
-                    dayElement.classList.add('calendar-day', 'h-24', 'p-1', 'border', 'rounded-lg', 'cursor-pointer', `status-${bookingStatus.toLowerCase()}`);
-                    dayElement.dataset.date = dateString;
+                    // Get the first day of the month and the number of days
+                    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                    const daysInMonth = lastDay.getDate();
+                    const startingDay = firstDay.getDay();
                     
-                    dayElement.innerHTML = `
-                        <div class="calendar-day-number text-right text-sm font-medium mb-1">${day}</div>
-                        ${bookings.map(booking => `
-                            <div class="text-xs p-1 mb-1 truncate rounded ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                                ${booking.eventType} - ${booking.customerName}
-                            </div>
-                        `).join('')}
-                    `;
+                    // Get all bookings for the current month at once
+                    const allBookings = await getAllBookings();
                     
-                    dayElement.addEventListener('click', () => openBookingForm(day));
-                    dayElement.draggable = true;
-                    dayElement.addEventListener('dragstart', (e) => {
-                        if (selectedBookingId) {
-                            e.dataTransfer.setData('text/plain', selectedBookingId);
-                        }
+                    // Cache bookings for use in other functions
+                    window.cachedBookings = allBookings;
+                    
+                    const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+                    const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+                    
+                    // Filter bookings for current month
+                    const monthBookings = allBookings.filter(booking => {
+                        const bookingDate = new Date(booking.date);
+                        return bookingDate >= monthStart && bookingDate <= monthEnd;
                     });
-                    dayElement.addEventListener('dragover', (e) => e.preventDefault());
-                    dayElement.addEventListener('drop', (e) => {
-                        e.preventDefault();
-                        const bookingId = e.dataTransfer.getData('text/plain');
-                        if (bookingId) {
-                            moveBookingToDate(bookingId, dateString);
+                    
+                    // Create a map for quick lookup
+                    const bookingsByDate = {};
+                    monthBookings.forEach(booking => {
+                        if (!bookingsByDate[booking.date]) {
+                            bookingsByDate[booking.date] = [];
                         }
+                        bookingsByDate[booking.date].push(booking);
                     });
-                    calendarEl.appendChild(dayElement);
+                    
+                    // Add empty cells for days of previous month
+                    for (let i = 0; i < startingDay; i++) {
+                        const dayElement = document.createElement('div');
+                        dayElement.classList.add('h-24', 'p-1');
+                        calendarEl.appendChild(dayElement);
+                    }
+                    
+                    // Add cells for each day of the month
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+                        const dateString = formatDate(date);
+                        
+                        const bookings = bookingsByDate[dateString] || [];
+                        const bookingStatus = bookings.length > 0 ? bookings[0].status : 'Available';
+                        
+                        const dayElement = document.createElement('div');
+                        dayElement.classList.add('calendar-day', 'h-24', 'p-1', 'border', 'rounded-lg', 'cursor-pointer', `status-${bookingStatus.toLowerCase()}`);
+                        dayElement.dataset.date = dateString;
+                        
+                        dayElement.innerHTML = `
+                            <div class="calendar-day-number text-right text-sm font-medium mb-1">${day}</div>
+                            ${bookings.map(booking => `
+                                <div class="text-xs p-1 mb-1 truncate rounded ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                    ${booking.eventType} - ${booking.customerName}
+                                </div>
+                            `).join('')}
+                        `;
+                        
+                        dayElement.addEventListener('click', () => openBookingForm(day));
+                        dayElement.draggable = true;
+                        dayElement.addEventListener('dragstart', (e) => {
+                            if (selectedBookingId) {
+                                e.dataTransfer.setData('text/plain', selectedBookingId);
+                            }
+                        });
+                        dayElement.addEventListener('dragover', (e) => e.preventDefault());
+                        dayElement.addEventListener('drop', (e) => {
+                            e.preventDefault();
+                            const bookingId = e.dataTransfer.getData('text/plain');
+                            if (bookingId) {
+                                moveBookingToDate(bookingId, dateString);
+                            }
+                        });
+                        calendarEl.appendChild(dayElement);
+                    }
+                } catch (error) {
+                    console.error('Error rendering calendar:', error);
+                    calendarEl.innerHTML = '<div class="text-red-500 text-center py-4">Error loading calendar. Please refresh the page.</div>';
                 }
             }
 
@@ -462,6 +555,11 @@
             // Get bookings for a specific date
             async function getBookingsForDate(date) {
                 try {
+                    // Use cached bookings if available (from renderCalendar)
+                    if (window.cachedBookings) {
+                        return window.cachedBookings.filter(booking => booking.date === date);
+                    }
+                    
                     const bookings = await getAllBookings();
                     return bookings.filter(booking => booking.date === date);
                 } catch (error) {
