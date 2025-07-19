@@ -200,26 +200,31 @@
             let selectedBookingId = null;
 
             // Export to Excel function
-            function exportToExcel() {
-                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                if (bookings.length === 0) {
-                    alert('No bookings to export');
-                    return;
+            async function exportToExcel() {
+                try {
+                    const bookings = await getAllBookings();
+                    if (bookings.length === 0) {
+                        alert('No bookings to export');
+                        return;
+                    }
+                    
+                    let csv = 'Date,Customer Name,Phone,Event Type,Status,Notes\n';
+                    bookings.forEach(booking => {
+                        csv += `"${formatDisplayDate(booking.date)}","${booking.customerName}","${booking.customerPhone}","${booking.eventType}","${booking.status}","${booking.notes || ''}"\n`;
+                    });
+                    
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `BukitMarak_bookings_${new Date().toISOString().split('T')[0]}.csv`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (error) {
+                    console.error('Error exporting bookings:', error);
+                    alert('Error exporting bookings. Please try again.');
                 }
-                
-                let csv = 'Date,Customer Name,Phone,Event Type,Status,Notes\n';
-                bookings.forEach(booking => {
-                    csv += `"${formatDisplayDate(booking.date)}","${booking.customerName}","${booking.customerPhone}","${booking.eventType}","${booking.status}","${booking.notes || ''}"\n`;
-                });
-                
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `BukitMarak_bookings_${new Date().toISOString().split('T')[0]}.csv`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
             }
             
             // Format date for display
@@ -234,68 +239,151 @@
             }
             
             // Show all bookings (past and future)
-            function showAllBookings() {
-                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                
-                if (bookings.length === 0) {
-                    bookingsList.innerHTML = '<p class="text-gray-500 text-center py-4">No bookings found</p>';
-                    return;
+            async function showAllBookings() {
+                try {
+                    const bookings = await getAllBookings();
+                    
+                    if (bookings.length === 0) {
+                        bookingsList.innerHTML = '<p class="text-gray-500 text-center py-4">No bookings found</p>';
+                        return;
+                    }
+                    
+                    bookingsList.innerHTML = `
+                        <div class="mb-4 overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${bookings.map(booking => `
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${formatDisplayDate(booking.date)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${booking.customerName}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${booking.customerPhone}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${booking.eventType}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs rounded-full ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                                ${booking.status}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button class="edit-booking text-amber-600 hover:text-amber-900 mr-3" data-id="${booking.id}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="delete-booking text-red-600 hover:text-red-900" data-id="${booking.id}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error loading all bookings:', error);
+                    bookingsList.innerHTML = '<p class="text-red-500 text-center py-4">Error loading bookings. Please try again.</p>';
                 }
-                
-                bookingsList.innerHTML = `
-                    <div class="mb-4 overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Type</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${bookings.map(booking => `
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">${formatDisplayDate(booking.date)}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">${booking.customerName}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">${booking.customerPhone}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">${booking.eventType}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 text-xs rounded-full ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                                            ${booking.status}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button class="edit-booking text-amber-600 hover:text-amber-900 mr-3" data-id="${booking.id}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="delete-booking text-red-600 hover:text-red-900" data-id="${booking.id}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
             }
             
+            // Firebase Database Functions
+            async function getAllBookings() {
+                try {
+                    const { collection, getDocs, query, orderBy } = window.firebaseDB;
+                    const bookingsRef = collection(window.firebaseDB.db, 'bookings');
+                    const q = query(bookingsRef, orderBy('date'));
+                    const querySnapshot = await getDocs(q);
+                    const bookings = [];
+                    querySnapshot.forEach((doc) => {
+                        bookings.push({ id: doc.id, ...doc.data() });
+                    });
+                    return bookings;
+                } catch (error) {
+                    console.error('Error getting bookings:', error);
+                    return [];
+                }
+            }
+
+            async function addBooking(bookingData) {
+                try {
+                    const { collection, addDoc } = window.firebaseDB;
+                    const bookingsRef = collection(window.firebaseDB.db, 'bookings');
+                    const docRef = await addDoc(bookingsRef, bookingData);
+                    return docRef.id;
+                } catch (error) {
+                    console.error('Error adding booking:', error);
+                    throw error;
+                }
+            }
+
+            async function updateBooking(bookingId, bookingData) {
+                try {
+                    const { doc, updateDoc } = window.firebaseDB;
+                    const bookingRef = doc(window.firebaseDB.db, 'bookings', bookingId);
+                    await updateDoc(bookingRef, bookingData);
+                } catch (error) {
+                    console.error('Error updating booking:', error);
+                    throw error;
+                }
+            }
+
+            async function deleteBookingFromDB(bookingId) {
+                try {
+                    const { doc, deleteDoc } = window.firebaseDB;
+                    const bookingRef = doc(window.firebaseDB.db, 'bookings', bookingId);
+                    await deleteDoc(bookingRef);
+                } catch (error) {
+                    console.error('Error deleting booking:', error);
+                    throw error;
+                }
+            }
+
             // Initialize the calendar
-            function initCalendar() {
+            async function initCalendar() {
                 renderCalendar();
-                loadBookings();
+                await loadBookings();
                 
-                // Load existing bookings from localStorage
-                if (!localStorage.getItem('bukitMarakBookings')) {
-                    localStorage.setItem('bukitMarakBookings', JSON.stringify([]));
+                // Set up real-time listener for bookings
+                setupRealtimeListener();
+            }
+
+            // Set up real-time listener for bookings
+            function setupRealtimeListener() {
+                try {
+                    const { collection, onSnapshot, query, orderBy } = window.firebaseDB;
+                    const bookingsRef = collection(window.firebaseDB.db, 'bookings');
+                    const q = query(bookingsRef, orderBy('date'));
+                    
+                    onSnapshot(q, (snapshot) => {
+                        const bookings = [];
+                        snapshot.forEach((doc) => {
+                            bookings.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        // Update calendar and bookings list
+                        renderCalendar().catch(error => {
+                            console.error('Error rendering calendar:', error);
+                        });
+                        loadBookings().catch(error => {
+                            console.error('Error loading bookings:', error);
+                        });
+                    }, (error) => {
+                        console.error('Error listening to bookings:', error);
+                    });
+                } catch (error) {
+                    console.error('Error setting up real-time listener:', error);
                 }
             }
 
             // Render the calendar for the current month
-            function renderCalendar() {
+            async function renderCalendar() {
                 // Clear the calendar
                 calendarEl.innerHTML = '';
                 
@@ -323,7 +411,7 @@
                     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
                     const dateString = formatDate(date);
                     
-                    const bookings = getBookingsForDate(dateString);
+                    const bookings = await getBookingsForDate(dateString);
                     const bookingStatus = bookings.length > 0 ? bookings[0].status : 'Available';
                     
                     const dayElement = document.createElement('div');
@@ -372,18 +460,23 @@
             }
 
             // Get bookings for a specific date
-            function getBookingsForDate(date) {
-                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                return bookings.filter(booking => booking.date === date);
+            async function getBookingsForDate(date) {
+                try {
+                    const bookings = await getAllBookings();
+                    return bookings.filter(booking => booking.date === date);
+                } catch (error) {
+                    console.error('Error getting bookings for date:', error);
+                    return [];
+                }
             }
 
             // Open booking form
-            function openBookingForm(day) {
+            async function openBookingForm(day) {
                 selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
                 const dateString = formatDate(selectedDate);
                 bookingDateInput.value = dateString;
                 
-                const bookings = getBookingsForDate(dateString);
+                const bookings = await getBookingsForDate(dateString);
                 
                 if (bookings.length > 0) {
                     const booking = bookings[0];
@@ -410,128 +503,140 @@
             }
 
             // Load and display all bookings
-            function loadBookings() {
-                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                const now = new Date();
-                const todayString = formatDate(now);
-                
-                // Filter upcoming bookings (from today onwards) and sort by date
-                const upcoming = bookings
-                    .filter(booking => booking.date >= todayString)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-                
-                bookingsList.innerHTML = '';
-                
-                if (upcoming.length === 0) {
-                    bookingsList.innerHTML = '<p class="text-gray-500 text-center py-4">No upcoming bookings found</p>';
-                    return;
-                }
-                
-                upcoming.forEach(booking => {
-                    const bookingDate = new Date(booking.date);
-                    const bookingItem = document.createElement('div');
-                    bookingItem.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'border');
-                    bookingItem.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-medium text-gray-800">${booking.customerName}</h4>
-                                <div class="text-sm text-gray-600">${bookingDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                                <div class="mt-1">
-                                    <span class="inline-block px-2 py-1 text-xs rounded-full ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                                        ${booking.status}
-                                    </span>
-                                    <span class="ml-2 text-sm text-gray-600">${booking.eventType}</span>
+            async function loadBookings() {
+                try {
+                    const bookings = await getAllBookings();
+                    const now = new Date();
+                    const todayString = formatDate(now);
+                    
+                    // Filter upcoming bookings (from today onwards) and sort by date
+                    const upcoming = bookings
+                        .filter(booking => booking.date >= todayString)
+                        .sort((a, b) => new Date(a.date) - new Date(b.date));
+                    
+                    bookingsList.innerHTML = '';
+                    
+                    if (upcoming.length === 0) {
+                        bookingsList.innerHTML = '<p class="text-gray-500 text-center py-4">No upcoming bookings found</p>';
+                        return;
+                    }
+                    
+                    upcoming.forEach(booking => {
+                        const bookingDate = new Date(booking.date);
+                        const bookingItem = document.createElement('div');
+                        bookingItem.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'border');
+                        bookingItem.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-medium text-gray-800">${booking.customerName}</h4>
+                                    <div class="text-sm text-gray-600">${bookingDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                                    <div class="mt-1">
+                                        <span class="inline-block px-2 py-1 text-xs rounded-full ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                            ${booking.status}
+                                        </span>
+                                        <span class="ml-2 text-sm text-gray-600">${booking.eventType}</span>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="edit-booking p-2 text-amber-600 hover:text-amber-700" data-id="${booking.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-booking p-2 text-red-600 hover:text-red-700" data-id="${booking.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-                            <div class="flex space-x-2">
-                                <button class="edit-booking p-2 text-amber-600 hover:text-amber-700" data-id="${booking.id}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="delete-booking p-2 text-red-600 hover:text-red-700" data-id="${booking.id}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                            ${booking.notes ? `<div class="mt-2 text-sm text-gray-700"><strong>Notes:</strong> ${booking.notes}</div>` : ''}
+                            <div class="mt-2 text-sm text-gray-500 flex items-center">
+                                <i class="fas fa-phone-alt mr-1"></i> ${booking.customerPhone}
                             </div>
-                        </div>
-                        ${booking.notes ? `<div class="mt-2 text-sm text-gray-700"><strong>Notes:</strong> ${booking.notes}</div>` : ''}
-                        <div class="mt-2 text-sm text-gray-500 flex items-center">
-                            <i class="fas fa-phone-alt mr-1"></i> ${booking.customerPhone}
-                        </div>
-                    `;
-                    bookingsList.appendChild(bookingItem);
-                });
-                
-                // Add event listeners to edit and delete buttons
-                document.querySelectorAll('.edit-booking').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const bookingId = this.dataset.id;
-                        editBooking(bookingId);
+                        `;
+                        bookingsList.appendChild(bookingItem);
                     });
-                });
-                
-                document.querySelectorAll('.delete-booking').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const bookingId = this.dataset.id;
-                        const booking = bookings.find(b => b.id === bookingId);
-                        showConfirmationModal(
-                            'Delete Booking',
-                            `Are you sure you want to delete the booking for ${booking.customerName} on ${new Date(booking.date).toLocaleDateString('en-US')}?`,
-                            () => deleteBooking(bookingId)
-                        );
+                    
+                    // Add event listeners to edit and delete buttons
+                    document.querySelectorAll('.edit-booking').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const bookingId = this.dataset.id;
+                            editBooking(bookingId);
+                        });
                     });
-                });
+                    
+                    document.querySelectorAll('.delete-booking').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const bookingId = this.dataset.id;
+                            const booking = bookings.find(b => b.id === bookingId);
+                            showConfirmationModal(
+                                'Delete Booking',
+                                `Are you sure you want to delete the booking for ${booking.customerName} on ${new Date(booking.date).toLocaleDateString('en-US')}?`,
+                                () => deleteBooking(bookingId)
+                            );
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error loading bookings:', error);
+                    bookingsList.innerHTML = '<p class="text-red-500 text-center py-4">Error loading bookings. Please try again.</p>';
+                }
             }
 
             // Edit a booking
-            function editBooking(bookingId) {
-                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                const booking = bookings.find(b => b.id === bookingId);
-                
-                if (booking) {
-                    const dateParts = booking.date.split('-');
-                    selectedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+            async function editBooking(bookingId) {
+                try {
+                    const bookings = await getAllBookings();
+                    const booking = bookings.find(b => b.id === bookingId);
                     
-                    // Set the calendar to the booking's month
-                    currentDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-                    renderCalendar();
-                    
-                    // Open the form with booking details
-                    document.getElementById('booking-date').value = booking.date;
-                    document.getElementById('customer-name').value = booking.customerName;
-                    document.getElementById('customer-phone').value = booking.customerPhone;
-                    document.getElementById('event-type').value = booking.eventType;
-                    document.getElementById('booking-status').value = booking.status;
-                    document.getElementById('notes').value = booking.notes || '';
-                    selectedBookingId = bookingId;
-                    
-                    bookingFormContainer.style.display = 'block';
-                    window.scrollTo({
-                        top: bookingFormContainer.offsetTop - 20,
-                        behavior: 'smooth'
-                    });
+                    if (booking) {
+                        const dateParts = booking.date.split('-');
+                        selectedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                        
+                        // Set the calendar to the booking's month
+                        currentDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+                        await renderCalendar();
+                        
+                        // Open the form with booking details
+                        document.getElementById('booking-date').value = booking.date;
+                        document.getElementById('customer-name').value = booking.customerName;
+                        document.getElementById('customer-phone').value = booking.customerPhone;
+                        document.getElementById('event-type').value = booking.eventType;
+                        document.getElementById('booking-status').value = booking.status;
+                        document.getElementById('notes').value = booking.notes || '';
+                        selectedBookingId = bookingId;
+                        
+                        bookingFormContainer.style.display = 'block';
+                        window.scrollTo({
+                            top: bookingFormContainer.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error editing booking:', error);
+                    alert('Error loading booking details. Please try again.');
+                }
+            }
+
+            // Move a booking to a new date
+            async function moveBookingToDate(bookingId, newDate) {
+                try {
+                    await updateBooking(bookingId, { date: newDate });
+                    await renderCalendar();
+                    await loadBookings();
+                } catch (error) {
+                    console.error('Error moving booking:', error);
+                    alert('Error moving booking. Please try again.');
                 }
             }
 
             // Delete a booking
-            function moveBookingToDate(bookingId, newDate) {
-                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                const updatedBookings = bookings.map(booking => {
-                    if (booking.id === bookingId) {
-                        return {...booking, date: newDate};
-                    }
-                    return booking;
-                });
-                localStorage.setItem('bukitMarakBookings', JSON.stringify(updatedBookings));
-                renderCalendar();
-                loadBookings();
-            }
-
-            function deleteBooking(bookingId) {
-                const bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                const updatedBookings = bookings.filter(booking => booking.id !== bookingId);
-                localStorage.setItem('bukitMarakBookings', JSON.stringify(updatedBookings));
-                renderCalendar();
-                loadBookings();
-                hideConfirmationModal();
+            async function deleteBooking(bookingId) {
+                try {
+                    await deleteBookingFromDB(bookingId);
+                    await renderCalendar();
+                    await loadBookings();
+                    hideConfirmationModal();
+                } catch (error) {
+                    console.error('Error deleting booking:', error);
+                    alert('Error deleting booking. Please try again.');
+                }
             }
 
             // Show confirmation modal
@@ -575,17 +680,17 @@
             }
 
             // Event Listeners
-            prevMonthBtn.addEventListener('click', () => {
+            prevMonthBtn.addEventListener('click', async () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar();
+                await renderCalendar();
             });
 
-            nextMonthBtn.addEventListener('click', () => {
+            nextMonthBtn.addEventListener('click', async () => {
                 currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar();
+                await renderCalendar();
             });
 
-            bookingForm.addEventListener('submit', function(e) {
+            bookingForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 // If changing date, don't submit the form
@@ -611,51 +716,48 @@
                     return;
                 }
                 
-                let bookings = JSON.parse(localStorage.getItem('bukitMarakBookings')) || [];
-                
-                if (selectedBookingId) {
-                    // Update existing booking
-                    bookings = bookings.map(booking => {
-                        if (booking.id === selectedBookingId) {
-                            return {
-                                ...booking,
-                                customerName,
-                                customerPhone,
-                                eventType,
-                                status,
-                                notes,
-                                date
-                            };
+                try {
+                    if (selectedBookingId) {
+                        // Update existing booking
+                        await updateBooking(selectedBookingId, {
+                            customerName,
+                            customerPhone,
+                            eventType,
+                            status,
+                            notes,
+                            date
+                        });
+                    } else {
+                        // Check if date is already booked
+                        const existingBookings = await getBookingsForDate(date);
+                        const conflictingBooking = existingBookings.find(b => b.status !== 'Available');
+                        
+                        if (conflictingBooking && status !== 'Available') {
+                            alert(`This date is already booked by ${conflictingBooking.customerName}. Please check availability.`);
+                            return;
                         }
-                        return booking;
-                    });
-                } else {
-                    // Create new booking
-                    const newBooking = {
-                        id: Date.now().toString(),
-                        customerName,
-                        customerPhone,
-                        eventType,
-                        status,
-                        notes,
-                        date
-                    };
-                    
-                    // Only add if the date is available (unless status is Available)
-                    const existingBooking = bookings.find(b => b.date === date && b.status !== 'Available');
-                    if (existingBooking && status !== 'Available') {
-                        alert(`This date is already booked by ${existingBooking.customerName}. Please check availability.`);
-                        return;
+                        
+                        // Create new booking
+                        const newBooking = {
+                            customerName,
+                            customerPhone,
+                            eventType,
+                            status,
+                            notes,
+                            date
+                        };
+                        
+                        await addBooking(newBooking);
                     }
                     
-                    bookings.push(newBooking);
+                    await renderCalendar();
+                    await loadBookings();
+                    bookingFormContainer.style.display = 'none';
+                    selectedBookingId = null;
+                } catch (error) {
+                    console.error('Error saving booking:', error);
+                    alert('Error saving booking. Please try again.');
                 }
-                
-                localStorage.setItem('bukitMarakBookings', JSON.stringify(bookings));
-                renderCalendar();
-                loadBookings();
-                bookingFormContainer.style.display = 'none';
-                selectedBookingId = null;
             });
 
             cancelBookingBtn.addEventListener('click', function() {
@@ -663,12 +765,17 @@
                 selectedBookingId = null;
             });
 
-            refreshBookingsBtn.addEventListener('click', loadBookings);
+            refreshBookingsBtn.addEventListener('click', async () => {
+                await loadBookings();
+            });
 
             modalCancel.addEventListener('click', hideConfirmationModal);
 
             // Initialize the app
-            initCalendar();
+            initCalendar().catch(error => {
+                console.error('Error initializing app:', error);
+                alert('Error initializing the application. Please refresh the page.');
+            });
             
             // Add event listeners for new buttons
             document.getElementById('export-excel').addEventListener('click', exportToExcel);
@@ -678,6 +785,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, onSnapshot, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
         // Optionally import analytics if needed:
         // import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js';
 
@@ -695,6 +803,22 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Make Firebase functions available globally
+        window.firebaseDB = {
+            db,
+            collection,
+            addDoc,
+            updateDoc,
+            deleteDoc,
+            doc,
+            getDocs,
+            onSnapshot,
+            query,
+            orderBy
+        };
+        
         // Optionally initialize analytics:
         // const analytics = getAnalytics(app);
     </script>
