@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bukit Marak Wedding - Booking Management</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <link rel="preconnect" href="https://www.gstatic.com">
-        <link rel="preconnect" href="https://firebaseapp.com">
-        <link rel="dns-prefetch" href="https://www.gstatic.com">
-        <link rel="dns-prefetch" href="https://firebaseapp.com">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Custom styles */
         .status-booked {
@@ -73,45 +69,11 @@
                 <button id="prev-month" class="p-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="fas fa-chevron-left text-gray-700"></i>
                 </button>
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <button id="date-picker-btn" class="px-3 py-1 text-sm rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
-                            <i class="fas fa-calendar-alt mr-1"></i>Select Date
-                        </button>
-                        <h2 id="current-month" class="text-xl font-semibold text-gray-800 text-center">Loading...</h2>
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="view-month" class="px-3 py-1 text-sm rounded-md bg-amber-600 text-white">Month</button>
-                        <button id="view-week" class="px-3 py-1 text-sm rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Week</button>
-                        <button id="view-year" class="px-3 py-1 text-sm rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Year</button>
-                    </div>
-                </div>
+                <h2 id="current-month" class="text-xl font-semibold text-gray-800 text-center">Loading...</h2>
                 <button id="next-month" class="p-2 rounded-lg hover:bg-gray-100 transition">
                     <i class="fas fa-chevron-right text-gray-700"></i>
                 </button>
             </div>
-            
-            <!-- Search and Filter Bar -->
-            <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                <div class="flex flex-col md:flex-row gap-3">
-                    <div class="flex-1">
-                        <input type="text" id="search-bookings" placeholder="Search by customer name, phone, or event type..." 
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                    </div>
-                    <div class="flex gap-2">
-                        <select id="filter-status" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <option value="">All Status</option>
-                            <option value="Booked">Booked</option>
-                            <option value="Tentative">Tentative</option>
-                            <option value="Available">Available</option>
-                        </select>
-                        <button id="print-calendar" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-                            <i class="fas fa-print mr-2"></i>Print
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
             <div class="grid grid-cols-7 gap-1 mb-2 calendar-weekdays">
                 <div class="text-center font-medium text-sm text-gray-500 py-1">Sun</div>
                 <div class="text-center font-medium text-sm text-gray-500 py-1">Mon</div>
@@ -177,56 +139,6 @@
             </form>
         </div>
 
-        <!-- Analytics Dashboard -->
-        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Analytics Dashboard</h3>
-                <div class="flex space-x-2">
-                    <button id="refresh-analytics" class="p-2 text-amber-600 hover:text-amber-700 transition" title="Refresh Analytics">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="bg-gradient-to-r from-green-400 to-green-600 rounded-lg p-4 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">Total Bookings</p>
-                            <p class="text-2xl font-bold" id="total-bookings">0</p>
-                        </div>
-                        <i class="fas fa-calendar-check text-2xl opacity-80"></i>
-                    </div>
-                </div>
-                
-                <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg p-4 text-white">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm opacity-90">This Month</p>
-                            <p class="text-2xl font-bold" id="monthly-bookings">0</p>
-                        </div>
-                        <i class="fas fa-chart-line text-2xl opacity-80"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-semibold text-gray-800 mb-3">Popular Event Types</h4>
-                    <div id="event-types-chart" class="space-y-2">
-                        <!-- Chart will be generated here -->
-                    </div>
-                </div>
-                
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-semibold text-gray-800 mb-3">Monthly Trends</h4>
-                    <div id="monthly-trends" class="space-y-2">
-                        <!-- Trends will be generated here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Bookings List -->
         <div class="bg-white rounded-xl shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
@@ -264,9 +176,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Notification System -->
-    <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
         // Calendar and Booking Management Logic
@@ -499,16 +408,11 @@
                 
                 await renderCalendar();
                 await loadBookings();
-                await updateAnalytics();
                 
                 // Set up real-time listener for bookings only if Firebase is available
                 if (window.firebaseDB) {
                     setupRealtimeListener();
                 }
-                
-                // Set up search and filter functionality
-                setupSearchAndFilter();
-                setupKeyboardShortcuts();
             }
 
             // Set up real-time listener for bookings
@@ -534,609 +438,11 @@
                         loadBookings().catch(error => {
                             console.error('Error loading bookings:', error);
                         });
-                        updateAnalytics().catch(error => {
-                            console.error('Error updating analytics:', error);
-                        });
                     }, (error) => {
                         console.error('Error listening to bookings:', error);
                     });
                 } catch (error) {
                     console.error('Error setting up real-time listener:', error);
-                }
-            }
-
-            // Analytics Functions
-            async function updateAnalytics() {
-                try {
-                    const bookings = await getAllBookings();
-                    const now = new Date();
-                    const currentMonth = now.getMonth();
-                    const currentYear = now.getFullYear();
-                    
-                    // Total bookings
-                    document.getElementById('total-bookings').textContent = bookings.length;
-                    
-                    // Monthly bookings
-                    const monthlyBookings = bookings.filter(booking => {
-                        const bookingDate = new Date(booking.date);
-                        return bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear;
-                    });
-                    document.getElementById('monthly-bookings').textContent = monthlyBookings.length;
-                    
-                    // Event types chart
-                    updateEventTypesChart(bookings);
-                    
-                    // Monthly trends
-                    updateMonthlyTrends(bookings);
-                    
-                } catch (error) {
-                    console.error('Error updating analytics:', error);
-                }
-            }
-
-            function updateEventTypesChart(bookings) {
-                const eventTypes = {};
-                bookings.forEach(booking => {
-                    eventTypes[booking.eventType] = (eventTypes[booking.eventType] || 0) + 1;
-                });
-                
-                const chartContainer = document.getElementById('event-types-chart');
-                chartContainer.innerHTML = '';
-                
-                Object.entries(eventTypes).forEach(([type, count]) => {
-                    const percentage = Math.round((count / bookings.length) * 100);
-                    const barWidth = Math.max(percentage, 10); // Minimum 10% width
-                    
-                    chartContainer.innerHTML += `
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-700">${type}</span>
-                            <div class="flex items-center gap-2">
-                                <div class="w-24 bg-gray-200 rounded-full h-2">
-                                    <div class="bg-amber-600 h-2 rounded-full" style="width: ${barWidth}%"></div>
-                                </div>
-                                <span class="text-xs text-gray-500">${count}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            function updateMonthlyTrends(bookings) {
-                const monthlyData = {};
-                const now = new Date();
-                
-                // Get last 6 months
-                for (let i = 5; i >= 0; i--) {
-                    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                    const monthKey = month.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                    monthlyData[monthKey] = 0;
-                }
-                
-                bookings.forEach(booking => {
-                    const bookingDate = new Date(booking.date);
-                    const monthKey = bookingDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                    if (monthlyData[monthKey] !== undefined) {
-                        monthlyData[monthKey]++;
-                    }
-                });
-                
-                const trendsContainer = document.getElementById('monthly-trends');
-                trendsContainer.innerHTML = '';
-                
-                Object.entries(monthlyData).forEach(([month, count]) => {
-                    trendsContainer.innerHTML += `
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm font-medium text-gray-700">${month}</span>
-                            <span class="text-sm text-gray-500">${count} bookings</span>
-                        </div>
-                    `;
-                });
-            }
-
-            // Search and Filter Functions
-            function setupSearchAndFilter() {
-                const searchInput = document.getElementById('search-bookings');
-                const filterSelect = document.getElementById('filter-status');
-                
-                searchInput.addEventListener('input', filterBookings);
-                filterSelect.addEventListener('change', filterBookings);
-                
-                // Add search result click to navigate to calendar
-                searchInput.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter') {
-                        navigateToSearchResult();
-                    }
-                });
-
-                // Add search suggestions
-                searchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.toLowerCase();
-                    if (searchTerm.length >= 2) {
-                        showSearchSuggestions(searchTerm);
-                    } else {
-                        hideSearchSuggestions();
-                    }
-                });
-
-                // Close suggestions when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!searchInput.contains(e.target) && !document.getElementById('search-suggestions')?.contains(e.target)) {
-                        hideSearchSuggestions();
-                    }
-                });
-
-                // Focus on search input with Ctrl/Cmd + K
-                document.addEventListener('keydown', function(e) {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                        e.preventDefault();
-                        searchInput.focus();
-                        searchInput.select();
-                    }
-                });
-            }
-
-            // Show search suggestions
-            async function showSearchSuggestions(searchTerm) {
-                try {
-                    const allBookings = await getAllBookings();
-                    const suggestions = allBookings.filter(booking => 
-                        booking.customerName.toLowerCase().includes(searchTerm) ||
-                        booking.customerPhone.includes(searchTerm) ||
-                        booking.eventType.toLowerCase().includes(searchTerm)
-                    ).slice(0, 5); // Limit to 5 suggestions
-
-                    if (suggestions.length > 0) {
-                        const searchInput = document.getElementById('search-bookings');
-                        let suggestionsContainer = document.getElementById('search-suggestions');
-                        
-                        if (!suggestionsContainer) {
-                            const container = document.createElement('div');
-                            container.id = 'search-suggestions';
-                            container.className = 'absolute top-full left-0 right-0 bg-white border border-gray-300 rounded-md shadow-lg z-10 mt-1';
-                            searchInput.parentNode.style.position = 'relative';
-                            searchInput.parentNode.appendChild(container);
-                            suggestionsContainer = container;
-                        }
-                        suggestionsContainer.innerHTML = suggestions.map(booking => `
-                            <div class="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0" 
-                                 onclick="selectSuggestion('${booking.customerName}', '${booking.date}')">
-                                <div class="font-medium text-gray-800">${booking.customerName}</div>
-                                <div class="text-sm text-gray-600">${new Date(booking.date).toLocaleDateString()} - ${booking.eventType}</div>
-                            </div>
-                        `).join('');
-                    }
-                } catch (error) {
-                    console.error('Error showing suggestions:', error);
-                }
-            }
-
-            // Hide search suggestions
-            function hideSearchSuggestions() {
-                const suggestionsContainer = document.getElementById('search-suggestions');
-                if (suggestionsContainer) {
-                    suggestionsContainer.remove();
-                }
-            }
-
-            // Select suggestion and navigate
-            async function selectSuggestion(customerName, dateString) {
-                document.getElementById('search-bookings').value = customerName;
-                hideSearchSuggestions();
-                
-                // Navigate to the booking date
-                const bookingDate = new Date(dateString);
-                currentDate = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), 1);
-                await renderCalendar();
-                
-                // Highlight the specific day
-                setTimeout(() => {
-                    const dayElement = document.querySelector(`[data-date="${dateString}"]`);
-                    if (dayElement) {
-                        dayElement.style.border = '3px solid #f59e0b';
-                        dayElement.style.transform = 'scale(1.05)';
-                        dayElement.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.5)';
-                        setTimeout(() => {
-                            dayElement.style.border = '';
-                            dayElement.style.transform = '';
-                            dayElement.style.boxShadow = '';
-                        }, 3000);
-                    }
-                }, 500);
-                
-                // Scroll to calendar
-                document.getElementById('calendar').scrollIntoView({ behavior: 'smooth' });
-                showNotification(`Navigated to ${customerName}'s booking`);
-            }
-
-            // Notification System
-            function showNotification(message, type = 'success') {
-                const container = document.getElementById('notification-container');
-                const notification = document.createElement('div');
-                
-                const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
-                const icon = type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
-                
-                notification.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-sm`;
-                notification.innerHTML = `
-                    <i class="${icon}"></i>
-                    <span>${message}</span>
-                    <button onclick="this.parentElement.remove()" class="ml-auto text-white hover:text-gray-200">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                
-                container.appendChild(notification);
-                
-                // Auto-remove after 4 seconds
-                setTimeout(() => {
-                    if (notification.parentElement) {
-                        notification.remove();
-                    }
-                }, 4000);
-            }
-
-            // Navigate to calendar when search result is clicked
-            async function navigateToSearchResult() {
-                const searchTerm = document.getElementById('search-bookings').value.toLowerCase();
-                if (!searchTerm) return;
-                
-                try {
-                    const allBookings = await getAllBookings();
-                    const matchingBookings = allBookings.filter(booking => 
-                        booking.customerName.toLowerCase().includes(searchTerm) ||
-                        booking.customerPhone.includes(searchTerm) ||
-                        booking.eventType.toLowerCase().includes(searchTerm)
-                    );
-                    
-                    if (matchingBookings.length > 0) {
-                        // Navigate to the first matching booking's date
-                        const firstBooking = matchingBookings[0];
-                        const bookingDate = new Date(firstBooking.date);
-                        currentDate = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), 1);
-                        await renderCalendar();
-                        
-                        // Highlight the specific day
-                        const dayElement = document.querySelector(`[data-date="${firstBooking.date}"]`);
-                        if (dayElement) {
-                            dayElement.style.border = '3px solid #f59e0b';
-                            dayElement.style.transform = 'scale(1.05)';
-                            dayElement.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.5)';
-                            setTimeout(() => {
-                                dayElement.style.border = '';
-                                dayElement.style.transform = '';
-                                dayElement.style.boxShadow = '';
-                            }, 3000);
-                        }
-                        
-                        // Show notification
-                        showNotification(`Found ${matchingBookings.length} booking(s) for "${searchTerm}". Navigated to ${firstBooking.customerName}'s booking.`);
-                        
-                        // Scroll to calendar
-                        document.getElementById('calendar').scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                        showNotification(`No bookings found for "${searchTerm}"`, 'error');
-                    }
-                } catch (error) {
-                    console.error('Error navigating to search result:', error);
-                    showNotification('Error searching bookings', 'error');
-                }
-            }
-
-            async function filterBookings() {
-                const searchTerm = document.getElementById('search-bookings').value.toLowerCase();
-                const filterStatus = document.getElementById('filter-status').value;
-                
-                try {
-                    const allBookings = await getAllBookings();
-                    let filteredBookings = allBookings;
-                    
-                    // Apply search filter
-                    if (searchTerm) {
-                        filteredBookings = filteredBookings.filter(booking => 
-                            booking.customerName.toLowerCase().includes(searchTerm) ||
-                            booking.customerPhone.includes(searchTerm) ||
-                            booking.eventType.toLowerCase().includes(searchTerm)
-                        );
-                    }
-                    
-                    // Apply status filter
-                    if (filterStatus) {
-                        filteredBookings = filteredBookings.filter(booking => 
-                            booking.status === filterStatus
-                        );
-                    }
-                    
-                    // Update bookings list with filtered results
-                    displayFilteredBookings(filteredBookings);
-                    
-                } catch (error) {
-                    console.error('Error filtering bookings:', error);
-                }
-            }
-
-            function displayFilteredBookings(bookings) {
-                const bookingsList = document.getElementById('bookings-list');
-                const searchTerm = document.getElementById('search-bookings').value.toLowerCase();
-                
-                if (bookings.length === 0) {
-                    bookingsList.innerHTML = '<p class="text-gray-500 text-center py-4">No bookings match your search criteria</p>';
-                    return;
-                }
-                
-                bookingsList.innerHTML = '';
-                
-                bookings.forEach(booking => {
-                    const bookingDate = new Date(booking.date);
-                    const bookingItem = document.createElement('div');
-                    bookingItem.classList.add('bg-gray-50', 'p-4', 'rounded-lg', 'border', 'cursor-pointer', 'hover:bg-gray-100', 'transition');
-                    
-                    // Highlight search terms
-                    const highlightedName = searchTerm ? booking.customerName.replace(new RegExp(searchTerm, 'gi'), match => `<mark class="bg-yellow-200 px-1 rounded">${match}</mark>`) : booking.customerName;
-                    const highlightedPhone = searchTerm ? booking.customerPhone.replace(new RegExp(searchTerm, 'gi'), match => `<mark class="bg-yellow-200 px-1 rounded">${match}</mark>`) : booking.customerPhone;
-                    const highlightedEventType = searchTerm ? booking.eventType.replace(new RegExp(searchTerm, 'gi'), match => `<mark class="bg-yellow-200 px-1 rounded">${match}</mark>`) : booking.eventType;
-                    
-                    bookingItem.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-medium text-gray-800">${highlightedName}</h4>
-                                <div class="text-sm text-gray-600">${bookingDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                                <div class="mt-1">
-                                    <span class="inline-block px-2 py-1 text-xs rounded-full ${booking.status === 'Booked' ? 'bg-red-100 text-red-800' : booking.status === 'Tentative' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                                        ${booking.status}
-                                    </span>
-                                    <span class="ml-2 text-sm text-gray-600">${highlightedEventType}</span>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="edit-booking p-2 text-amber-600 hover:text-amber-700" data-id="${booking.id}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="delete-booking p-2 text-red-600 hover:text-red-700" data-id="${booking.id}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        ${booking.notes ? `<div class="mt-2 text-sm text-gray-700"><strong>Notes:</strong> ${booking.notes}</div>` : ''}
-                        <div class="mt-2 text-sm text-gray-500 flex items-center">
-                            <i class="fas fa-phone-alt mr-1"></i> ${highlightedPhone}
-                        </div>
-                    `;
-                    
-                    // Add click to navigate to calendar
-                    bookingItem.addEventListener('click', function(e) {
-                        if (!e.target.closest('button')) {
-                            navigateToBookingDate(booking.date);
-                        }
-                    });
-                    
-                    bookingsList.appendChild(bookingItem);
-                });
-                
-                // Re-add event listeners
-                addBookingEventListeners();
-            }
-
-            // Navigate to specific booking date
-            async function navigateToBookingDate(dateString) {
-                const bookingDate = new Date(dateString);
-                currentDate = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), 1);
-                await renderCalendar();
-                
-                // Highlight the specific day
-                setTimeout(() => {
-                    const dayElement = document.querySelector(`[data-date="${dateString}"]`);
-                    if (dayElement) {
-                        dayElement.style.border = '3px solid #f59e0b';
-                        dayElement.style.transform = 'scale(1.05)';
-                        setTimeout(() => {
-                            dayElement.style.border = '';
-                            dayElement.style.transform = '';
-                        }, 3000);
-                    }
-                }, 500);
-                
-                // Scroll to calendar
-                document.getElementById('calendar').scrollIntoView({ behavior: 'smooth' });
-            }
-
-            // Keyboard Shortcuts
-            function setupKeyboardShortcuts() {
-                document.addEventListener('keydown', function(e) {
-                    // Ctrl/Cmd + K: Focus search
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                        e.preventDefault();
-                        document.getElementById('search-bookings').focus();
-                    }
-                    
-                    // Ctrl/Cmd + N: New booking
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-                        e.preventDefault();
-                        // Open booking form for today
-                        const today = new Date();
-                        openBookingForm(today.getDate());
-                    }
-                    
-                    // Ctrl/Cmd + P: Print calendar
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-                        e.preventDefault();
-                        printCalendar();
-                    }
-                    
-                    // Escape: Close forms/modals
-                    if (e.key === 'Escape') {
-                        const bookingForm = document.getElementById('booking-form-container');
-                        const modal = document.getElementById('confirmation-modal');
-                        
-                        if (bookingForm.style.display === 'block') {
-                            bookingForm.style.display = 'none';
-                        }
-                        if (modal.style.display === 'flex') {
-                            modal.style.display = 'none';
-                        }
-                    }
-                });
-            }
-
-            // Print Calendar Function
-            function printCalendar() {
-                const printWindow = window.open('', '_blank');
-                const currentMonth = document.getElementById('current-month').textContent;
-                const calendarHTML = document.getElementById('calendar').innerHTML;
-                
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Bukit Marak Wedding - ${currentMonth}</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-                            .calendar-day { border: 1px solid #ccc; padding: 10px; min-height: 80px; }
-                            .calendar-day-number { font-weight: bold; margin-bottom: 5px; }
-                            .booking-item { font-size: 12px; margin: 2px 0; padding: 2px; border-radius: 3px; }
-                            .status-booked { background-color: #fecaca; }
-                            .status-tentative { background-color: #fef3c7; }
-                            .status-available { background-color: #d1fae5; }
-                            @media print { body { margin: 0; } }
-                        </style>
-                    </head>
-                    <body>
-                        <h1>Bukit Marak Wedding - ${currentMonth}</h1>
-                        <div class="calendar-grid">
-                            ${calendarHTML}
-                        </div>
-                    </body>
-                    </html>
-                `);
-                
-                printWindow.document.close();
-                printWindow.print();
-            }
-
-            // Date Picker Function
-            function showDatePicker() {
-                const today = new Date();
-                const currentYear = today.getFullYear();
-                const currentMonth = today.getMonth();
-                const currentDay = today.getDate();
-                
-                // Create date picker modal
-                const modal = document.getElementById('confirmation-modal');
-                const modalTitle = document.getElementById('modal-title');
-                const modalMessage = document.getElementById('modal-message');
-                const modalConfirm = document.getElementById('modal-confirm');
-                const modalCancel = document.getElementById('modal-cancel');
-                
-                modalTitle.textContent = 'Select Date';
-                modalMessage.innerHTML = `
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
-                            <select id="year-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                ${generateYearOptions(currentYear)}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Month</label>
-                            <select id="month-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                ${generateMonthOptions()}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Day (Optional)</label>
-                            <select id="day-select" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
-                                <option value="">Select Month First</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-                
-                // Set current values
-                document.getElementById('year-select').value = currentDate.getFullYear();
-                document.getElementById('month-select').value = currentDate.getMonth();
-                
-                // Update day options when month changes
-                document.getElementById('month-select').addEventListener('change', updateDayOptions);
-                document.getElementById('year-select').addEventListener('change', updateDayOptions);
-                
-                // Initial day options
-                updateDayOptions();
-                
-                modal.style.display = 'flex';
-                
-                modalConfirm.onclick = function() {
-                    const selectedYear = parseInt(document.getElementById('year-select').value);
-                    const selectedMonth = parseInt(document.getElementById('month-select').value);
-                    const selectedDay = document.getElementById('day-select').value;
-                    
-                    if (selectedYear && selectedMonth !== undefined) {
-                        // Navigate to selected month
-                        currentDate = new Date(selectedYear, selectedMonth, 1);
-                        renderCalendar();
-                        
-                        // If specific day is selected, highlight it
-                        if (selectedDay) {
-                            const selectedDate = new Date(selectedYear, selectedMonth, parseInt(selectedDay));
-                            const dateString = formatDate(selectedDate);
-                            setTimeout(() => {
-                                const dayElement = document.querySelector(`[data-date="${dateString}"]`);
-                                if (dayElement) {
-                                    dayElement.style.border = '3px solid #f59e0b';
-                                    dayElement.style.transform = 'scale(1.05)';
-                                    setTimeout(() => {
-                                        dayElement.style.border = '';
-                                        dayElement.style.transform = '';
-                                    }, 3000);
-                                }
-                            }, 500);
-                        }
-                        
-                        hideConfirmationModal();
-                    }
-                };
-                
-                modalCancel.onclick = hideConfirmationModal;
-            }
-
-            function generateYearOptions(currentYear) {
-                let options = '';
-                for (let year = currentYear - 5; year <= currentYear + 5; year++) {
-                    options += `<option value="${year}">${year}</option>`;
-                }
-                return options;
-            }
-
-            function generateMonthOptions() {
-                const months = [
-                    'January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'
-                ];
-                let options = '';
-                months.forEach((month, index) => {
-                    options += `<option value="${index}">${month}</option>`;
-                });
-                return options;
-            }
-
-            function updateDayOptions() {
-                const yearSelect = document.getElementById('year-select');
-                const monthSelect = document.getElementById('month-select');
-                const daySelect = document.getElementById('day-select');
-                
-                if (!yearSelect || !monthSelect || !daySelect) return;
-                
-                const year = parseInt(yearSelect.value);
-                const month = parseInt(monthSelect.value);
-                
-                if (year && month !== undefined) {
-                    const daysInMonth = new Date(year, month + 1, 0).getDate();
-                    let options = '<option value="">Select Day (Optional)</option>';
-                    
-                    for (let day = 1; day <= daysInMonth; day++) {
-                        options += `<option value="${day}">${day}</option>`;
-                    }
-                    
-                    daySelect.innerHTML = options;
                 }
             }
 
@@ -1346,39 +652,30 @@
                         bookingsList.appendChild(bookingItem);
                     });
                     
-                                // Add event listeners to edit and delete buttons
-            addBookingEventListeners();
-        } catch (error) {
-            console.error('Error loading bookings:', error);
-            bookingsList.innerHTML = '<p class="text-red-500 text-center py-4">Error loading bookings. Please try again.</p>';
-        }
-    }
-
-    // Helper function to add event listeners to booking buttons
-    function addBookingEventListeners() {
-        document.querySelectorAll('.edit-booking').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const bookingId = this.dataset.id;
-                editBooking(bookingId);
-            });
-        });
-        
-        document.querySelectorAll('.delete-booking').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const bookingId = this.dataset.id;
-                getAllBookings().then(bookings => {
-                    const booking = bookings.find(b => b.id === bookingId);
-                    if (booking) {
-                        showConfirmationModal(
-                            'Delete Booking',
-                            `Are you sure you want to delete the booking for ${booking.customerName} on ${new Date(booking.date).toLocaleDateString('en-US')}?`,
-                            () => deleteBooking(bookingId)
-                        );
-                    }
-                });
-            });
-        });
-    }
+                    // Add event listeners to edit and delete buttons
+                    document.querySelectorAll('.edit-booking').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const bookingId = this.dataset.id;
+                            editBooking(bookingId);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.delete-booking').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const bookingId = this.dataset.id;
+                            const booking = bookings.find(b => b.id === bookingId);
+                            showConfirmationModal(
+                                'Delete Booking',
+                                `Are you sure you want to delete the booking for ${booking.customerName} on ${new Date(booking.date).toLocaleDateString('en-US')}?`,
+                                () => deleteBooking(bookingId)
+                            );
+                        });
+                    });
+                } catch (error) {
+                    console.error('Error loading bookings:', error);
+                    bookingsList.innerHTML = '<p class="text-red-500 text-center py-4">Error loading bookings. Please try again.</p>';
+                }
+            }
 
             // Edit a booking
             async function editBooking(bookingId) {
@@ -1572,68 +869,15 @@
 
             modalCancel.addEventListener('click', hideConfirmationModal);
 
-                    // Register Service Worker for caching
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
+            // Initialize the app
+            initCalendar().catch(error => {
+                console.error('Error initializing app:', error);
+                alert('Error initializing the application. Please refresh the page.');
             });
-        }
-
-        // Initialize the app
-        initCalendar().catch(error => {
-            console.error('Error initializing app:', error);
-            alert('Error initializing the application. Please refresh the page.');
-        });
             
             // Add event listeners for new buttons
             document.getElementById('export-excel').addEventListener('click', exportToExcel);
             document.getElementById('show-all-bookings').addEventListener('click', showAllBookings);
-            
-            // Add event listeners for new features
-            document.getElementById('refresh-analytics').addEventListener('click', async () => {
-                await updateAnalytics();
-            });
-            
-            document.getElementById('print-calendar').addEventListener('click', printCalendar);
-            
-            // Date picker button
-            document.getElementById('date-picker-btn').addEventListener('click', showDatePicker);
-            
-            // Calendar view buttons
-            document.getElementById('view-month').addEventListener('click', () => {
-                document.getElementById('view-month').classList.add('bg-amber-600', 'text-white');
-                document.getElementById('view-month').classList.remove('bg-gray-200', 'text-gray-700');
-                document.getElementById('view-week').classList.remove('bg-amber-600', 'text-white');
-                document.getElementById('view-week').classList.add('bg-gray-200', 'text-gray-700');
-                document.getElementById('view-year').classList.remove('bg-amber-600', 'text-white');
-                document.getElementById('view-year').classList.add('bg-gray-200', 'text-gray-700');
-            });
-            
-            document.getElementById('view-week').addEventListener('click', () => {
-                document.getElementById('view-week').classList.add('bg-amber-600', 'text-white');
-                document.getElementById('view-week').classList.remove('bg-gray-200', 'text-gray-700');
-                document.getElementById('view-month').classList.remove('bg-amber-600', 'text-white');
-                document.getElementById('view-month').classList.add('bg-gray-200', 'text-gray-700');
-                document.getElementById('view-year').classList.remove('bg-amber-600', 'text-white');
-                document.getElementById('view-year').classList.add('bg-gray-200', 'text-gray-700');
-                // TODO: Implement week view
-            });
-            
-            document.getElementById('view-year').addEventListener('click', () => {
-                document.getElementById('view-year').classList.add('bg-amber-600', 'text-white');
-                document.getElementById('view-year').classList.remove('bg-gray-200', 'text-gray-700');
-                document.getElementById('view-month').classList.remove('bg-amber-600', 'text-white');
-                document.getElementById('view-month').classList.add('bg-gray-200', 'text-gray-700');
-                document.getElementById('view-week').classList.remove('bg-amber-600', 'text-white');
-                document.getElementById('view-week').classList.add('bg-gray-200', 'text-gray-700');
-                // TODO: Implement year view
-            });
         });
     </script>
     <script type="module">
